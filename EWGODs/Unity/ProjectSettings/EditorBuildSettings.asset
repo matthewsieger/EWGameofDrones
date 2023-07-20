@@ -8,12 +8,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CageConfig.unity
     guid: 2cda990e2423bbf4892e6590ba056729
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
-  - enabled: 1
-    path: Assets/Scenes/SensorPlacement 1.unity
-    guid: 702047a432ba67f4398071e912ae7dd7
   - enabled: 1
     path: Assets/Scenes/SensorReadings.unity
     guid: 56714025981370a46b79436359b1b93d
