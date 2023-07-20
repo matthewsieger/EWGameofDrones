@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO.Ports;
 using System;
 using System.Linq;
+using TMPro;
 
 // class that handles receiving data from the coordinator Arduino
 public class ArduinoListener : MonoBehaviour
@@ -15,10 +16,11 @@ public class ArduinoListener : MonoBehaviour
 	SerialPort Port;
 	
 	// set in inspector
-	public string COM;				// the serial port the arduino can be accessed from
-	public CageRenderer Cage;		// reference to CageRenderer for calculations
-	public GameObject PingTemplate;	// reference to template ping object
-	public SensorManager Manager;	// for accessing sensor data
+	public string COM;					// the serial port the arduino can be accessed from
+	public CageRenderer Cage;			// reference to CageRenderer for calculations
+	public GameObject PingTemplate;		// reference to template ping object
+	public TMP_Text PingTextTemplate;	// reference to template ping text object
+	public SensorManager Manager;		// for accessing sensor data
 	
 	// list of types of sensors that can handle ping packets
 	List<Sensor> Sensors = new List<Sensor>();
@@ -57,6 +59,7 @@ public class ArduinoListener : MonoBehaviour
 			Sensors.Add(sensor);
 			sensor.Cage = Cage;
 			sensor.PingTemplate = PingTemplate;
+			sensor.PingTextTemplate = PingTextTemplate;
 			sensor.Manager = Manager;
         }
     }

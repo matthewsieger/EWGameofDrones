@@ -14,7 +14,7 @@ public class LIDAR : Sensor
 	}
 	
 	// calculate the position of a sensor ping
-    protected override Vector2 CalculatePing(Ping ping)
+    protected override Vector3 CalculatePing(Ping ping)
 	{
 		// get the data from the ping
 		// LIDAR packets only have the distance as the data
@@ -23,16 +23,18 @@ public class LIDAR : Sensor
 	
 		// calculate the position of the ping
 		
-		Vector2 coord = new Vector2();	// the coordinates (xy) of the ping
+		Vector3 coord = new Vector3();	// the coordinates (xy) of the ping
 		
 		// the ping should be <distance> away from the sensor
 		coord.x = CmToScreen(distance);
 		coord.y = 0f;
+		coord.z = 0f;
 		
 		// apply the sensor's angle and position to the coordinates
 		coord = ApplySensorAngle(coord);
 		coord = AddSensorPosition(coord);
 		
+		Debug.Log(coord.z);
 		// return the ping coordinates
 		return coord;
 	}

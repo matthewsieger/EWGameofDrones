@@ -10,7 +10,7 @@ public class OMNISonic : Sensor
 		Type = 4;
 	}
 	
-	protected override Vector2 CalculatePing(Ping ping)
+	protected override Vector3 CalculatePing(Ping ping)
 	{
 		// get the data from the ping
 		// LIDAR packets only have the distance as the data
@@ -19,14 +19,15 @@ public class OMNISonic : Sensor
 		int hRotation = Convert.ToInt16(ping.data[1]);
 		int vRotation = Convert.ToInt16(ping.data[2]);
 		
-		Vector2 coord = new Vector2();
+		Vector3 coord = new Vector3();
 		
 		// rotate coordinate by horizontal rotation (degrees) sensor is positioned at
 		// formula:
 		//	x' = x*Cos(theta) - y*Sin(theta)
 		//	y' = y*Cos(theta) + x*Sin(theta)
-		coord.x = Cage.FeetToPixels(distance / 12) * Mathf.Cos(Mathf.Deg2Rad * (SensorData.hRotation + hRotation)) * Mathf.Sin(Mathf.Deg2Rad * ((90 - SensorData.vRotation) + vRotation));
-		coord.y = Cage.FeetToPixels(distance / 12) * Mathf.Sin(Mathf.Deg2Rad * (SensorData.hRotation + hRotation)) * Mathf.Sin(Mathf.Deg2Rad * ((90 - SensorData.vRotation) + vRotation));
+		coord.x = Cage.FeetToPixels(distance / 12f) * Mathf.Cos(Mathf.Deg2Rad * (SensorData.hRotation + hRotation)) * Mathf.Sin(Mathf.Deg2Rad * ((90 - SensorData.vRotation) + vRotation));
+		coord.y = Cage.FeetToPixels(distance / 12f) * Mathf.Sin(Mathf.Deg2Rad * (SensorData.hRotation + hRotation)) * Mathf.Sin(Mathf.Deg2Rad * ((90 - SensorData.vRotation) + vRotation));
+		coord.z = Cage.FeetToPixels(distance / 12f) * Mathf.Cos(Mathf.Deg2Rad * ((90f - SensorData.vRotation) + vRotation));
 		
 		//coord *= Mathf.Sin(Mathf.Deg2Rad * (SensorData.vRotation + vRotation));
 		

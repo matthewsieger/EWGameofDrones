@@ -1,21 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 // blueprint for sensor classes
 public abstract class Sensor : MonoBehaviour
 {
 	public CageRenderer Cage { protected get; set; }		// for getting cage dimensions. Expected to be set upon creation
 	public GameObject PingTemplate { private get; set; }	// for creating pings. Expected to be set upon creation
+	public TMP_Text PingTextTemplate {private get; set; }	// for showing pings' altitude. Expected to be set upon creation
 	public SensorManager Manager { private get; set; }		// for getting sensor data. Expected to be set upon creation
+	private Camera MainCamera;
 	
 	public uint Type { get; protected set; }	// the type associated with a sensor. Should be set in subclass constructor
 	
 	protected SensorConfiguration SensorData { get; private set; }	// stores data relating to sensors. Set by LoadSensorData()
 	
-    protected abstract Vector2 CalculatePing(Ping ping);	// subclasses must define this to calculate the coordinates of the ping
+    protected abstract Vector3 CalculatePing(Ping ping);	// subclasses must define this to calculate the coordinates of the ping
 	
 	protected abstract Ping CalculateJamPing();
+	
+	void Start()
+	{
+		MainCamera = GameObject.Find("Main Camera").GetComponent<Camera>() as Camera;
+	}
 	
 	// create fake packets for all sensors matching the type of this instance
 	public void Jam()
@@ -60,7 +68,7 @@ public abstract class Sensor : MonoBehaviour
 		}
 		
 		// calculate the coordinates on the screen of the ping
-		Vector2 coord = CalculatePing(ping);
+		Vector3 coord = CalculatePing(ping);
 		
 		// display the ping on the screen
 		PlotOnScreen(coord);
@@ -84,20 +92,44 @@ public abstract class Sensor : MonoBehaviour
 	}
 	
 	// display a ping at specified coordinates
-	void PlotOnScreen(Vector2 coord2D)
+	void PlotOnScreen(Vector3 coord)
 	{
 		// we will need to convert the given 2D coordinate into a 3D coordinate for Unity
-		Vector3 coord3D = new Vector3();
+		Vector3 coordDisplayed = new Vector3();
 		
 		// transfer the data from the 2D coordinate to the 3D coordinate
-		coord3D.x = coord2D.x;
-		coord3D.y = coord2D.y;
-		coord3D.z = 0f;	// use z = 0
+		coordDisplayed.x = coord.x;
+		coordDisplayed.y = coord.y;
+		coordDisplayed.z = 0;	// use z = 0. the z component is used for the number display
 		
 		// create and setup the ping object
 		GameObject pingObject = Instantiate(PingTemplate, transform);	// create ping
-		pingObject.transform.position = coord3D;						// set ping's position
+		pingObject.transform.position = coordDisplayed;						// set ping's position
 		pingObject.SetActive(true);										// activate ping
+		
+		// prepare the altitude text
+		// (altitude is inverted)
+		if (coord.z < 0)
+		{
+			// set the text in the format: "+x.xx"
+			PingTextTemplate.text = "+" + (-coord.z).ToString("n2");
+		}
+		else
+		{
+			// set the text in the format: "-x.xx"
+			PingTextTemplate.text = (-coord.z).ToString("n2");
+		}
+		
+		// create the text object
+		GameObject pingText = Instantiate(PingTextTemplate.gameObject, PingTextTemplate.gameObject.transform.parent);
+		
+		// set the text's position
+		Vector3 textPos = pingObject.transform.position;	// get position from ping
+		textPos.z = 2f;	// keep in front of other elements
+		pingText.transform.position = textPos;	// set position of text
+		
+		// make the text visible
+		pingText.SetActive(true);
 	}
 	
 	// convert a given value in centimeters to Unity units (screen units)
@@ -126,7 +158,7 @@ public abstract class Sensor : MonoBehaviour
 	}
 	
 	// centers the given coordinate around the sensor instead of (0, 0)
-	protected Vector2 AddSensorPosition(Vector2 coord)
+	protected Vector3 AddSensorPosition(Vector3 coord)
 	{
 		// add the coordinates of the sensor to the given coordinate
 		coord.x += GetSensorX(SensorData);
@@ -140,7 +172,7 @@ public abstract class Sensor : MonoBehaviour
 	// 	should be called before translating the coordinate to the sensor's position (i.e. AddSensorPosition())
 	// 	or ApplySensorAngle() should be called with 2 arguments
 	// WARNING: This function assumes that the given coordinate is level with the sensor (on the xy plane)
-	protected Vector2 ApplySensorAngle(Vector2 inCoord)
+	protected Vector3 ApplySensorAngle(Vector3 inCoord)
 	{
 		// assume sensor is at (0, 0) for calculations
 		return ApplySensorAngle(inCoord, new Vector2(0f, 0f));
@@ -149,33 +181,56 @@ public abstract class Sensor : MonoBehaviour
 	// rotate the given coordinate to match the rotation given to the sensor in setup.
 	// in this overload, the coordinate of the sensor is given as a parameter
 	// WARNING: This function assumes that the given coordinate is level with the sensor (on the xy plane)
-	protected Vector2 ApplySensorAngle(Vector2 inCoord, Vector2 sensorCoord)
+	protected Vector3 ApplySensorAngle(Vector3 inCoord, Vector2 sensorCoord)
 	{
-		// translate the coordinate to (0, 0) for the rotation
-		Vector2 translatedCoord = inCoord - sensorCoord;
+		return ApplySensorAngle(inCoord, new Vector3(sensorCoord.x, sensorCoord.y, 0f));
+	}
+	
+	// rotate the given coordinate to match the rotation given to the sensor in setup.
+	// in this overload, the coordinate of the sensor is given as a parameter
+	// WARNING: This funciton ignores the z property of the sensor coordinate
+	// WARNING: This function assumes that the given coordinate is level with the sensor (on the xy plane)
+	protected Vector3 ApplySensorAngle(Vector3 inCoord, Vector3 sensorCoord)
+	{
+		// translate the coordinate to (0, 0, 0) for the rotation
+		Vector3 translatedCoord = inCoord - sensorCoord;
 		
-		// stores calculated coordinates
-		Vector2 outCoord = new Vector2();
+		// calculate the spherical coordinates of the ping
+		// (distance, horizontal rotation, vertical rotation)
+		// formulas are:
+		//	distance = sqrt(x^2 + y^2 + z^2)
+		//	horizontal rotation = arctan(y/x)
+		//	vertical rotation = arccos(z/distance)
+		Vector3 sphericalCoord = new Vector3();
+		sphericalCoord.x = translatedCoord.magnitude;
+		sphericalCoord.y = Mathf.Atan2(translatedCoord.y, translatedCoord.x);
+		if (sphericalCoord.x == 0f)
+		{
+			sphericalCoord.z = 0f;	// if no distance from sensor, vertical angle doesn't matter
+		}
+		else
+		{
+			sphericalCoord.z = Mathf.Acos(translatedCoord.z / sphericalCoord.x);
+		}
 		
-		// rotate coordinate by horizontal rotation (degrees) sensor is positioned at
-		// formula:
-		//	x' = x*Cos(theta) - y*Sin(theta)
-		//	y' = y*Cos(theta) + x*Sin(theta)
-		outCoord.x = translatedCoord.x * Mathf.Cos(Mathf.Deg2Rad * SensorData.hRotation) - 
-			translatedCoord.y * Mathf.Sin(Mathf.Deg2Rad * SensorData.hRotation);
-		outCoord.y = translatedCoord.y * Mathf.Cos(Mathf.Deg2Rad * SensorData.hRotation) +
-			translatedCoord.x * Mathf.Sin(Mathf.Deg2Rad * SensorData.hRotation);
-
-		// rotate the coordinate about the sensor's vertical rotation.
-		// the rotation is 0 when the sensor faces straight up and goes to 90 degrees when sensor
-		// is aligned with the xy plane. To calculate the projection of the ping position on the xy
-		// plane we can multiply the coordinate by the sin of the vertical angle
-		outCoord *= Mathf.Sin(Mathf.Deg2Rad * SensorData.vRotation);
+		// apply the rotation of the sensor to the coordinate
+		sphericalCoord.y += Mathf.Deg2Rad * SensorData.hRotation;
+		sphericalCoord.z += Mathf.Deg2Rad * SensorData.vRotation;
 		
-		// translate the coordinate back to the sensor's position
-		outCoord += sensorCoord;
+		// convert back to Cartesian coordinates
+		// formulas are:
+		//	x = distance * sin(vertical rotation) * cos(horizontal rotation)
+		//	y = distance * sin(vertical rotation) * sin(horizontal rotation)
+		//	z = distance * cos(vertical rotation)
+		Vector3 cartesianCoord = new Vector3();
+		cartesianCoord.x = sphericalCoord.x * Mathf.Sin(sphericalCoord.z) * Mathf.Cos(sphericalCoord.y);
+		cartesianCoord.y = sphericalCoord.x * Mathf.Sin(sphericalCoord.z) * Mathf.Sin(sphericalCoord.y);
+		cartesianCoord.z = sphericalCoord.x * Mathf.Cos(sphericalCoord.z);
 		
-		// return calculated coordinate
-		return outCoord;
+		// reapply the sensor's position
+		cartesianCoord += sensorCoord;
+		
+		// return the calculated coordinate
+		return cartesianCoord;
 	}
 }

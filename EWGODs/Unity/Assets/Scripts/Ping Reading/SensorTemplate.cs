@@ -26,8 +26,8 @@ public class SensorTemplate : Sensor
 	// you must define this method
 	// it takes in a ping object (see Ping.cs) and calculates where on the
 	// screen a ping should display
-	// returns a Vector2 (a 2D coordinate. See Unity API documentation)
-    protected override Vector2 CalculatePing(Ping ping)
+	// returns a Vector3 (a 3D coordinate. See Unity API documentation)
+    protected override Vector3 CalculatePing(Ping ping)
 	{
 		// for examples of calculating ping coordinates, see LIDAR.cs and OMNISonic.cs
 		
@@ -48,19 +48,19 @@ public class SensorTemplate : Sensor
 		//	GetSensorY(SensorConfiguration config): float	calculates the y dimension of the sensor matching the
 		//		ping in Unity units
 		//
-		//	AddSensorPosition(Vector2 coord): Vector2	adds the position in Unity units of the sensor corresponding
+		//	AddSensorPosition(Vector3 coord): Vector3	adds the position in Unity units of the sensor corresponding
 		//		to the ping to the provided Vector
 		//
-		//	ApplySensorAngle(Vector2 coord): Vector2	rotates the coordinate about (0, 0) to match the physical
+		//	ApplySensorAngle(Vector3 coord): Vector3	rotates the coordinate about (0, 0) to match the physical
 		//		rotation of the sensor. Do not use if the sensor can pick up pings above or below its plane
 		//
-		//	ApplySensorAngle(Vector2 pingCoord, Vector2 sensorCoord): Vector2	rotates the coordinate
+		//	ApplySensorAngle(Vector3 pingCoord, Vector3 sensorCoord): Vector2	rotates the coordinate
 		//		about the sensor's coordinates to match the physical rotation of the sensor. Do not
 		//		use if the sensor can pick up pings above or below its plane
 		//
 		// See Unity.Mathf API documentation online to find trigonometric functions and other mathematical tools
 		//
-		// At the end of the function, return the Vector2 you have calculated
+		// At the end of the function, return the Vector3 you have calculated
 	}
 	
 	// generate a ping packet (preferably random) that will be displayed while jamming
