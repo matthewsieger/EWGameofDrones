@@ -16,7 +16,6 @@ public class ArduinoListener : MonoBehaviour
 	
 	// set in inspector
 	public string COM;				// the serial port the arduino can be accessed from
-	public Jammer SensorJammer;		// interface for the jamming functionality of this application
 	public CageRenderer Cage;		// reference to CageRenderer for calculations
 	public GameObject PingTemplate;	// reference to template ping object
 	public SensorManager Manager;	// for accessing sensor data
