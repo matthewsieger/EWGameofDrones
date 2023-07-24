@@ -125,7 +125,7 @@ public abstract class Sensor : MonoBehaviour
 		
 		// set the text's position
 		Vector3 textPos = pingObject.transform.position;	// get position from ping
-		textPos.z = 2f;	// keep in front of other elements
+		textPos.z = 0.1f;	// keep in front of other elements
 		pingText.transform.position = textPos;	// set position of text
 		
 		// make the text visible
