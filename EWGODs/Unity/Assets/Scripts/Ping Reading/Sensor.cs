@@ -227,6 +227,9 @@ public abstract class Sensor : MonoBehaviour
 		cartesianCoord.y = sphericalCoord.x * Mathf.Sin(sphericalCoord.z) * Mathf.Sin(sphericalCoord.y);
 		cartesianCoord.z = sphericalCoord.x * Mathf.Cos(sphericalCoord.z);
 		
+		Debug.Log(SensorData.vRotation);
+		Debug.Log(sphericalCoord.x.ToString() + ", " + (Mathf.Rad2Deg * sphericalCoord.y).ToString() + " " + (Mathf.Rad2Deg * sphericalCoord.z).ToString());
+		
 		// reapply the sensor's position
 		cartesianCoord += sensorCoord;
 		

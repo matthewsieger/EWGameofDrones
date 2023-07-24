@@ -26,15 +26,19 @@ public class LIDAR : Sensor
 		Vector3 coord = new Vector3();	// the coordinates (xy) of the ping
 		
 		// the ping should be <distance> away from the sensor
-		coord.x = CmToScreen(distance);
+		coord.x = distance;
 		coord.y = 0f;
 		coord.z = 0f;
 		
 		// apply the sensor's angle and position to the coordinates
 		coord = ApplySensorAngle(coord);
+		
+		coord.x = CmToScreen(coord.x);
+		coord.y = CmToScreen(coord.y);
+		coord.z *= 0.0328084f;
+		
 		coord = AddSensorPosition(coord);
 		
-		Debug.Log(coord.z);
 		// return the ping coordinates
 		return coord;
 	}

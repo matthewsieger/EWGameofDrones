@@ -25,7 +25,7 @@ public class SensorConfigReader : MonoBehaviour
 		Sensor.x = XField.ReadField();
 		Sensor.y = YField.ReadField();
 		Sensor.hRotation = HRotationField.ReadField();
-		Sensor.vRotation = 90 - VRotationField.ReadField();
+		Sensor.vRotation = VRotationField.ReadField();
 		
 		// return configuration
 		return Sensor;
