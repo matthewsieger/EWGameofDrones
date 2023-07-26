@@ -135,15 +135,11 @@ void xbeeSendPacket(int current_rssi){
   txRequest.setAddress64(0x0013A20041C165F8); // address of actual coordinator
 
   // Allocate <X> payload bytes: 1 type byte plus however many other data bytes needed
-  AllocBuffer<11> packet; // <X> = 1 1-byte (uint_8) + 5 2-bytes (integers)
+  AllocBuffer<3> packet; // <X> = 1 1-byte (uint_8) + 1 2-byte (integer)
   
   // Packet type & payload data items
-  packet.append<uint8_t>(1);
+  packet.append<uint8_t>(5);
   packet.append<int>(sensorID);
-  packet.append<int>(current_rssi);
-  packet.append<int>(hour(t)); 
-  packet.append<int>(minute(t));
-  packet.append<int>(second(t));
   
   // Set payload
   txRequest.setPayload(packet.head, packet.len());
@@ -154,7 +150,7 @@ void xbeeSendPacket(int current_rssi){
 }
 void xbeeSendNullPacket(){
   // For debugging purposes 
-  DebugSerial.println("Sending NULL packet");
+  /*DebugSerial.println("Sending NULL packet");
   
   // Allocate <X> payload bytes: 1 type byte plus however many other data bytes needed
   // Prepare the Zigbee Transmit Request API packet
@@ -174,7 +170,7 @@ void xbeeSendNullPacket(){
   txRequest.setPayload(packet.head, packet.len());
 
   // Send the packet
-  xbee.send(txRequest);
+  xbee.send(txRequest);*/
 
 }
 

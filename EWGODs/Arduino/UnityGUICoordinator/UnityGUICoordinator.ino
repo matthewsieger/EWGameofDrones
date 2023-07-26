@@ -454,8 +454,25 @@ void processRxPacket(ZBRxResponse& rx, uintptr_t)
 
     return;
   }
+  else if (type == 5 && b.len() == 2) // RFID packet received
+  {
+    // extract the id from the packet
+    // RFID packets arrive in the format:
+    // |type (1 byte)| |ID (2 bytes)|
+    int ID = b.remove<int>();
+
+    // construct packet in the format:
+    // |type| , |id|
+    packetToSend = String(type) + comma + String(ID);
+
+    // send the packet to the GUI
+    MATLABSerial.println(packetToSend);
+
+    return;
+  }
     
-  
+  MATLABSerial.println(type);
+  MATLABSerial.println(b.len());
   MATLABSerial.println(F("Unknown or invalid packet"));
   printResponse(rx, MATLABSerial);
 }
