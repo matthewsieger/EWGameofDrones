@@ -83,6 +83,9 @@ public class SensorDropdown : MonoBehaviour
 		
 		// refresh the visual component of the dropdown menu
 		Dropdown.RefreshShownValue();
+		
+		// fill in the user inputs with data
+		UpdateInputs();
 	}
 	
 	// delete the entry matching the given id if it exists
@@ -102,6 +105,14 @@ public class SensorDropdown : MonoBehaviour
 			OnIndexChange(Dropdown.value);						
 			Dropdown.RefreshShownValue();							// refresh the visual component of the dropdown
 		}
+	}
+	
+	// update the inputs to match the option selected
+	// usually this is done automatically
+	public void UpdateInputs()
+	{
+		// update the inputs
+		OnIndexChange(Dropdown.value);
 	}
 	
 	// runs when the dropdown changes
@@ -124,6 +135,9 @@ public class SensorDropdown : MonoBehaviour
 			
 			// deactivate the delete button as "New Sensor" cannot be deleted
 			DeleteButton.interactable = false;
+			
+			// all existing sensors should be visible
+			Manager.ShowAllSensors();
 		}
 		else
 		{
@@ -142,6 +156,10 @@ public class SensorDropdown : MonoBehaviour
 			
 			// enable the delete button
 			DeleteButton.interactable = true;
+			
+			// show all sensors except the saved version of the sensor being edited
+			Manager.ShowAllSensors();
+			Manager.HideSensor(targetID);
 		}
 	}
 	

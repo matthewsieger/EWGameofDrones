@@ -103,4 +103,27 @@ public class SensorManager : MonoBehaviour
 	{
 		return Sensors;
 	}
+	
+	// hide a specific sensor from view
+	public void HideSensor(uint id)
+	{
+		// find the sensor and deactivate it
+		SensorRenderer renderer = FindSensor(id);
+		
+		if (renderer != null)
+		{
+			renderer.gameObject.SetActive(false);
+		}
+	}
+	
+	// ensure all sensors are visible
+	public void ShowAllSensors()
+	{
+		// loop through each sensor
+		foreach(SensorRenderer renderer in Sensors)
+		{
+			// activate the sensor's sprite
+			renderer.gameObject.SetActive(true);
+		}
+	}
 }

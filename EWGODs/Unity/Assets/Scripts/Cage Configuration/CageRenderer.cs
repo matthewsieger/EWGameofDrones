@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 // handles rendering of the drone cage visual
 public class CageRenderer : MonoBehaviour
@@ -15,9 +16,11 @@ public class CageRenderer : MonoBehaviour
 	public LineRenderer CageEdge;		// line renderer displaying edges of the drone cage
 	public GameObject LineTemplate;		// prefab to make it easy to create new lines
 	public GameObject DroneStartBox;	// box for the drones to start in
+	public GameObject LabelPrefab;		// prefab object for sector labels
 	
 	List<LineRenderer> VerticalSectorEdges = new List<LineRenderer>();
 	List<LineRenderer> HorizontalSectorEdges = new List<LineRenderer>();
+	List<TMP_Text> SectorLabels = new List<TMP_Text>();
 	
 	[HideInInspector]
 	public float left, right, up, down;
@@ -225,12 +228,76 @@ public class CageRenderer : MonoBehaviour
 			
 			// scale the zone to fit the left area and place it there
 			DroneStartBox.transform.localScale = new Vector3(leftSectorBorder - left, up - down, 1);
-			DroneStartBox.transform.position = new Vector3((leftSectorBorder + left) / 2, (up + down) / 2, 1.25f);
+			DroneStartBox.transform.localPosition = new Vector3((leftSectorBorder + left) / 2, (up + down) / 2, 1.25f);
 		}
 		else
 		{
 			// if the sectors reach the left border of the cage, deactivate the drone starting zone visual
 			DroneStartBox.SetActive(false);
+		}
+		
+		
+		// display sector labels
+		
+		// if there are not enough labels for the number of sectors, make more
+		while (SectorLabels.Count < config.sectorCountX * config.sectorCountY)
+		{
+			// make a new label and store its text component
+			GameObject newLabel = Instantiate(LabelPrefab, LabelPrefab.transform.parent);
+			SectorLabels.Add(newLabel.GetComponent<TMP_Text>());
+		}
+		
+		// if there are too many labels for the number of sectors, delete some
+		if (SectorLabels.Count > config.sectorCountX * config.sectorCountY)
+		{
+			// destroy the GameObjects of extra labels
+			for (int i = (int)config.sectorCountX * (int)config.sectorCountY - 1; i < SectorLabels.Count - 1; i++)
+			{
+				Destroy(SectorLabels[i].gameObject);
+			}
+			
+			// remove excess labels from the list
+			SectorLabels.RemoveRange((int)config.sectorCountX * (int)config.sectorCountY - 1, SectorLabels.Count - (int)config.sectorCountX * (int)config.sectorCountY);
+		}
+		
+		// calculate the label (A1, A2, ..., B1, B2, ..., AA1, AA2, ... AB1, AB2, ...)
+		string text;
+		for (int i = 0; i < SectorLabels.Count; i++)
+		{
+			// start with an empty string
+			text = "";
+			
+			// calculate the column being evaluated
+			int j = (i / (int)config.sectorCountX) + 1;
+			
+			// form string of A-Z characters
+			while (j > 0)
+			{
+				// get the remainder of the division by number of letters in the alphabet to get the row as a char
+				text = (char)('A' + ((j - 1) % 26)) + text;
+				
+				// divide by number of letters in alphabet to allow repeat
+				j = (j - 1) / 26;
+			}
+			
+			// add the column number to the string
+			text += ((i % config.sectorCountX) + 1).ToString();
+			
+			// display the string
+			SectorLabels[i].text = text;
+		}
+		
+		// position the labels
+		for (int j = 0; j < VerticalSectorEdges.Count; j++)
+		{
+			for (int k = 0; k < HorizontalSectorEdges.Count; k++)
+			{
+				// position a label in the center of col j and row k
+				SectorLabels[j + k*VerticalSectorEdges.Count].transform.position = new Vector3(
+					leftSectorBorder + ((right - leftSectorBorder) / config.sectorCountX) * (j + 0.5f), 
+					up - ((up - down) / config.sectorCountY) * (k + 0.5f),
+					0.5f);
+			}
 		}
 	}
 }

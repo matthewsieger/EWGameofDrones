@@ -8,6 +8,9 @@ public class PingTextFader : MonoBehaviour
 	TMP_Text Text;
 	float Alpha = 1f;
 	
+	// set in inspector
+	public float TimeToFade;
+	
     // Start is called before the first frame update
     void Start()
     {
@@ -18,7 +21,7 @@ public class PingTextFader : MonoBehaviour
     void Update()
     {
 		
-        Alpha -= 2f * Time.deltaTime;
+        Alpha -= Time.deltaTime / TimeToFade;
 		
 		Text.alpha = Alpha;
 		

@@ -26,7 +26,7 @@ public class SensorTemplate : Sensor
 	// you must define this method
 	// it takes in a ping object (see Ping.cs) and calculates where on the
 	// screen a ping should display
-	// returns a Vector3 (a 3D coordinate. See Unity API documentation)
+	// returns a Vector3 (a 3D coordinate. See Unity API documentation) with units in Unity Units (see CmToScreen and FeetToPixels)
     protected override Vector3 CalculatePing(Ping ping)
 	{
 		// for examples of calculating ping coordinates, see LIDAR.cs and OMNISonic.cs

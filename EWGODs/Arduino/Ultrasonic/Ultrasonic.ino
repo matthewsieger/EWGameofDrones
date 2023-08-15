@@ -118,7 +118,8 @@ void sensorPulse()
   duration = pulseIn(echoPin, HIGH);
     
   // Calculate the distance
-  distance= duration*0.034/2;
+  distance= duration*0.034/5.08;
+  Serial.println(distance);
 
   // Timestamp when distance was received
   t = now();

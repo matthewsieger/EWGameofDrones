@@ -29,8 +29,7 @@ public class SensorSaver : MonoBehaviour
 		
 		uint id = SensorSelection.GetID();
 		
-		// save the sensor configuration and display it
-		Manager.SaveSensor(id, currentConfig);
+		
 		
 		// delete the sensor visually
 		if (id != currentConfig.id && id != 0)
@@ -40,10 +39,12 @@ public class SensorSaver : MonoBehaviour
 			SensorSelection.DeleteID(id);
 		}
 		
-		
+		// save the sensor configuration and display it
+		Manager.SaveSensor(id, currentConfig);
 		SensorSelection.AddNew(currentConfig.id);	// add option to dropdown
 		
-		// remove the preview (temporarily)
-		Preview.ResetPreview();
+		// hide the new sensor (not the preview)
+		Manager.ShowAllSensors();
+		Manager.HideSensor(currentConfig.id);
 	}
 }

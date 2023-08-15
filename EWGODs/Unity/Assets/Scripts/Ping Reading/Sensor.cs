@@ -26,7 +26,7 @@ public abstract class Sensor : MonoBehaviour
 	}
 	
 	// create fake packets for all sensors matching the type of this instance
-	public void Jam()
+	public void Jam(uint id)
 	{
 		// find all sensors
 		List<SensorRenderer> renderers = Manager.GetSensors();
@@ -34,8 +34,8 @@ public abstract class Sensor : MonoBehaviour
 		// check each sensor
 		foreach (SensorRenderer renderer in renderers)
 		{
-			// compare the sensor's type with the type of this Sensor instance
-			if (renderer.Config.type == this.GetType().Name)
+			// compare the sensor's type and id with the type of this Sensor instance
+			if (renderer.Config.type == this.GetType().Name && (renderer.Config.id == id || id == 0))
 			{
 				// if they match, generate fake pings.
 				// start by loading in the data for the current sensor
@@ -108,20 +108,20 @@ public abstract class Sensor : MonoBehaviour
 		pingObject.SetActive(true);										// activate ping
 		
 		// prepare the altitude text
-		// (altitude is inverted)
-		if (coord.z < 0f)
+		if (coord.z.ToString("n2") == "0.00")
 		{
-			// set the text in the format: "+x.xx"
-			PingTextTemplate.text = "+" + (-coord.z).ToString("n2");
+			// display nothing if no significant verticality
+			PingTextTemplate.text = "";
 		}
 		else if (coord.z > 0f)
 		{
-			// set the text in the format: "-x.xx"
-			PingTextTemplate.text = (-coord.z).ToString("n2");
+			// set the text in the format: "+x.xx"
+			PingTextTemplate.text = "+" + (coord.z).ToString("n2");
 		}
 		else
 		{
-			PingTextTemplate.text = "";
+			// set the text in the format: "-x.xx"
+			PingTextTemplate.text = (coord.z).ToString("n2");
 		}
 		
 		// create the text object
@@ -129,7 +129,7 @@ public abstract class Sensor : MonoBehaviour
 		
 		// set the text's position
 		Vector3 textPos = pingObject.transform.position;	// get position from ping
-		textPos.z = 0.1f;	// keep in front of other elements
+		textPos.z = 0f;	// keep in front of other elements
 		pingText.transform.position = textPos;	// set position of text
 		
 		// make the text visible
@@ -219,7 +219,7 @@ public abstract class Sensor : MonoBehaviour
 		
 		// apply the rotation of the sensor to the coordinate
 		sphericalCoord.y += Mathf.Deg2Rad * SensorData.hRotation;
-		sphericalCoord.z += Mathf.Deg2Rad * SensorData.vRotation;
+		sphericalCoord.z += Mathf.Deg2Rad * -SensorData.vRotation;
 		
 		// convert back to Cartesian coordinates
 		// formulas are:
@@ -231,8 +231,8 @@ public abstract class Sensor : MonoBehaviour
 		cartesianCoord.y = sphericalCoord.x * Mathf.Sin(sphericalCoord.z) * Mathf.Sin(sphericalCoord.y);
 		cartesianCoord.z = sphericalCoord.x * Mathf.Cos(sphericalCoord.z);
 		
-		Debug.Log(SensorData.vRotation);
-		Debug.Log(sphericalCoord.x.ToString() + ", " + (Mathf.Rad2Deg * sphericalCoord.y).ToString() + " " + (Mathf.Rad2Deg * sphericalCoord.z).ToString());
+		//Debug.Log(SensorData.vRotation);
+		//Debug.Log(sphericalCoord.x.ToString() + ", " + (Mathf.Rad2Deg * sphericalCoord.y).ToString() + " " + (Mathf.Rad2Deg * sphericalCoord.z).ToString());
 		
 		// reapply the sensor's position
 		cartesianCoord += sensorCoord;

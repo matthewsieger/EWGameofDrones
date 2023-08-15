@@ -75,7 +75,7 @@ public class SensorPreview : MonoBehaviour
 		// destroy the preview object
 		Destroy(PreviewObject);
 		
-		// prevent bad pointer
+		// prevent bad reference
 		PreviewObject = null;
 	}
 }
